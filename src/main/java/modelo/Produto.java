@@ -3,6 +3,7 @@ package modelo;
 import dao.ProdutoDao;
 import java.util.ArrayList;
 
+// Representando um (1) produto
 public class Produto {
     
     private int id;
@@ -16,6 +17,7 @@ public class Produto {
     private ProdutoDao dao;
     
 
+    // Construtores
     public Produto() {
         this(0, "", 0, "", "", 0, 0, 0);
     }
@@ -33,6 +35,8 @@ public class Produto {
         this.dao = new ProdutoDao();
     }
 
+    
+    // Getters e Setters
     public int getId() {
         return id;
     }
@@ -46,6 +50,7 @@ public class Produto {
     }
 
     public void setPreco(double preco) {
+        if (preco < 0) throw new IllegalArgumentException("Erro, o preço não pode ser negativo!");
         this.preco = preco;
     }
 
@@ -151,6 +156,9 @@ public class Produto {
         return dao.maiorID();
     }
 
+    
+    
+    
     public boolean reajustarPrecos(double percentual) {
         try {
             ArrayList<Produto> produtos = getMinhaLista();
@@ -171,3 +179,4 @@ public class Produto {
 }
 
 
+// Era uma boa transferir parte da lógica de acesso pro produtodao
