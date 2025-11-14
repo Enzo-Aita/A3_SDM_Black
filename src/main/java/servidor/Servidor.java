@@ -1,6 +1,3 @@
-// Documentado para javadoc
-// Fiz pelo onlinegdb, então pode dar algum bug na documentação!!
-
 package servidor;
 
 /**

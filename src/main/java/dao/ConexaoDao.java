@@ -1,5 +1,3 @@
-// Documentado para javadoc
-
 package dao;
 
 import java.sql.Connection;
