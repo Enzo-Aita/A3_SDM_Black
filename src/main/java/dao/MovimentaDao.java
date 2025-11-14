@@ -1,3 +1,5 @@
+// Documentado para javadoc
+
 package dao;
 
 import java.sql.Connection;
@@ -12,9 +14,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * Realiza operações de movimentação de produtos no BD
+ * 
+ * <p>
+ * Inclui métodos para: Registrar movimentações, consultar histórico, listar
+ * movimentações e obter ID
+ * </p>
+ */
 public class MovimentaDao extends ConexaoDao {
 
-   
+    /**
+     * Registra uma movimentação (entrada ou saída) de um produto no BD
+     * @param idProduto ID do produto
+     * @param quantidade quantidade de itens movimentada
+     * @param tipo Tipo de movimentação
+     * @param observacao Observação que acompanha o registro
+     * @return Retorna {@code true} se a movimentação funcionar e {@code false}
+     * caso algum erro aconteça
+     */
     public boolean registrarMovimentacao(int idProduto, int quantidade, String tipo, String observacao) {
         String sql = "INSERT INTO tb_movimentacao(id_produto, quantidade, tipo, data_hora, observacao) VALUES(?,?,?,?,?)";
         
@@ -35,6 +54,12 @@ public class MovimentaDao extends ConexaoDao {
         }
     }
     
+    /**
+     * Retorna o histórico de movimentações de um produto
+     * @param idProduto ID do produto
+     * @return Retorna uma lista com os registros do histórico
+     * Cada mapa da lista possui: {@code data_hora},{@code tipo}, {@code quantidade} e {@code observacao}D
+     */
     public List<Map<String, Object>> getHistoricoPorProduto(int idProduto) {
         List<Map<String, Object>> historico = new ArrayList<>();
     String sql = "SELECT * FROM tb_movimentacao WHERE id_produto = ? ORDER BY data_hora DESC";
@@ -63,7 +88,12 @@ public class MovimentaDao extends ConexaoDao {
     return historico;
 }
     
-   
+    /**
+     * Retorna todas as movimentações no sistema e nome do produto associado
+     * @return Retorna uma lista com registros das movimentações
+     * Cada mapa da ilsta possui: {@code id},{@code id_produto}, {@code nome_produto},
+     * {@code quantidade},{@code tipo},{@code data_hora} e {@code observacao}
+     */
     public List<Map<String, Object>> getTodasMovimentacoes() {
         List<Map<String, Object>> movimentacoes = new ArrayList<>();
         String sql = "SELECT m.*, p.produto as nome_produto FROM tb_movimentacao m "
@@ -94,7 +124,11 @@ public class MovimentaDao extends ConexaoDao {
         return movimentacoes;
     }
     
-    
+    /**
+     * Retorna o maior ID no BD
+     * @return Retorna o maior valor de {@code id} no {@code tb_movimentacao} ou 
+     * 0, caso não haja nenhum registro
+     */
     public int maiorID() {
         int maiorID = 0;
         String sql = "SELECT MAX(id) as max_id FROM tb_movimentacao";
