@@ -8,10 +8,19 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import modelo.Produto;
 
+/**
+ * Realiza operações de CRUD para os objetos {@link Produto} no BD
+ * Estende {@link ConexaoDao} para conectar
+ */
 public class ProdutoDao extends ConexaoDao {
 
+    /** Lista para armazenar os produtos no BD */
     public static ArrayList<Produto> minhaLista = new ArrayList<>();
 
+    /**
+     * Retorna uma lista com todos os produtos no BD
+     * @return Retorna lista de produtos no BD
+     */
     public ArrayList<Produto> getMinhaLista() {
 
         minhaLista.clear();
@@ -45,11 +54,19 @@ public class ProdutoDao extends ConexaoDao {
 
         return minhaLista;
     }
-
+    
+    /**
+     * Atuualiza a lista dos produtos
+     * @param minhaLista Lista atualizada
+     */
     public static void setMinhaLista(ArrayList<Produto> minhaLista) {
         ProdutoDao.minhaLista = minhaLista;
     }
 
+    /**
+     * Retorna o maior ID na lista de produtos
+     * @return Retorna o ID de maior valor (ou 0 caso haja falha)
+     */
     public int maiorID() {
         int maiorID = 0;
 
@@ -66,6 +83,11 @@ public class ProdutoDao extends ConexaoDao {
     }
 
 
+    /**
+     * Inserir um novo produto no BD
+     * @param objeto Objeto a ser inserido {@link Produto}
+     * @return Retorna true caso o processo funcione
+     */
     public boolean insertProdutoBD(Produto objeto) {
 
         String sql = "INSERT INTO tb_produtodao(id,produto,preco,unidade,categoria,quantidade,quantidademax,quantidademin) VALUES(?,?,?,?,?,?,?,?)";
@@ -91,6 +113,11 @@ public class ProdutoDao extends ConexaoDao {
         }
     }
 
+    /**
+     * Deleta um produto do BD
+     * @param id ID do produto a ser deletado
+     * @return Retorna true se a operação for terminada
+     */
     public boolean deleteProdutoBD(int id) {
         try {
             Statement stmt = this.getConexao().createStatement();
@@ -104,6 +131,11 @@ public class ProdutoDao extends ConexaoDao {
         return true;
     }
 
+    /**
+     * Atualiza um produto no BD
+     * @param objeto Produto com os novos dados
+     * @return Retorna true caso algum dados seja modificado
+     */
     public boolean updateProdutoBD(Produto objeto) {
         String sql = "UPDATE tb_produtodao SET produto = ?, preco = ?, unidade = ?, categoria = ?, "
                 + "quantidade = ?, quantidademax = ?, quantidademin = ? WHERE id = ?";
@@ -132,6 +164,12 @@ public class ProdutoDao extends ConexaoDao {
         }
     }
 
+    /**
+     * Atualiza o preço de um produto
+     * @param id ID do produto 
+     * @param novoPreco Novo preço do produto a ser atualizado
+     * @return Retorna true caso o produto seja atualizado corretamente
+     */
     public boolean updatePrecoBD(int id, int novoPreco) {
         String sql = "UPDATE tb_produtodao SET preco = ? WHERE id = ?";
 
@@ -150,6 +188,12 @@ public class ProdutoDao extends ConexaoDao {
         }
     }
 
+    /**
+     * Atualiza a quantidade de itens de um produto em estoque
+     * @param id ID do produto
+     * @param novaQuantidade Nova quantidade do produto em estoque
+     * @return Retorna true caso a operação funcione
+     */
     public boolean updateQuantidadeBD(int id, int novaQuantidade) {
         String sql = "UPDATE tb_produtodao SET quantidade = ? WHERE id = ?";
 
@@ -166,6 +210,11 @@ public class ProdutoDao extends ConexaoDao {
         }
     }
 
+    /**
+     * Carrega os dados de um produto com base no ID
+     * @param id ID do produto (para busca)
+     * @return Retorna o objeto {@link Produto} com os dados do BD
+     */
     public Produto carregaProduto(int id) {
         Produto objeto = new Produto();
         objeto.setId(id);
