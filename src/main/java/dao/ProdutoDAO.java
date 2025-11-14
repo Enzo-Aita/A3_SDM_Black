@@ -10,9 +10,9 @@ import modelo.Produto;
 
 /**
  * Realiza operações de CRUD para os objetos {@link Produto} no BD
- * Estende {@link ConexaoDao} para conectar
+ * Estende {@link ConexaoDAO} para conectar
  */
-public class ProdutoDao extends ConexaoDao {
+public class ProdutoDAO extends ConexaoDAO {
 
     /** Lista para armazenar os produtos no BD */
     public static ArrayList<Produto> minhaLista = new ArrayList<>();
@@ -60,7 +60,7 @@ public class ProdutoDao extends ConexaoDao {
      * @param minhaLista Lista atualizada
      */
     public static void setMinhaLista(ArrayList<Produto> minhaLista) {
-        ProdutoDao.minhaLista = minhaLista;
+        ProdutoDAO.minhaLista = minhaLista;
     }
 
     /**

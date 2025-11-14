@@ -1,6 +1,6 @@
 package modelo;
 
-import dao.ProdutoDao;
+import dao.ProdutoDAO;
 import java.util.ArrayList;
 
 /**
@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * <p>
  * Cada produto possui preço, unidade, categoria, quantidade e limite de
  * estoque.
- * Encapsula operações pelo {@link ProdutoDao}
+ * Encapsula operações pelo {@link ProdutoDAO}
  * </p>
  */
 public class Produto {
@@ -38,7 +38,7 @@ public class Produto {
     private int quantidademin;
     
     /** Objeto para acesso do BD */
-    private ProdutoDao dao;
+    private ProdutoDAO dao;
     
 
     // Construtores
@@ -71,7 +71,7 @@ public class Produto {
         this.quantidade = quantidade;
         this.quantidademax = quantidademax;
         this.quantidademin = quantidademin;
-        this.dao = new ProdutoDao();
+        this.dao = new ProdutoDAO();
     }
 
     
@@ -163,12 +163,12 @@ public class Produto {
     }
 
     /** @return Retorna o objeto de acesso ao BD */
-    public ProdutoDao getDao() {
+    public ProdutoDAO getDao() {
         return dao;
     }
 
     /** @param dao Novo dao para acesso ao BD */
-    public void setDao(ProdutoDao dao) {
+    public void setDao(ProdutoDAO dao) {
         this.dao = dao;
     }
     

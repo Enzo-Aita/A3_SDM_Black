@@ -10,12 +10,12 @@ import modelo.Categoria;
 
 /**
  * Operações CRUD da entidade {@link Categoria}
- * Estende {@link ConexaoDao} para acesso ao BD
+ * Estende {@link ConexaoDAO} para acesso ao BD
  * 
  * Essa função gera métodos para inserir, atualizar, excluir e consultar categorias dos produtos
  * Tabela: <code>tb_categoriadao</code>
  */
-public class CategoriaDao extends ConexaoDao {
+public class CategoriaDAO extends ConexaoDAO {
 
     /** Lista auxiliar de armazenamento para os objetos 'Categoria' no BD */
     public static ArrayList<Categoria> minhaLista = new ArrayList<>();

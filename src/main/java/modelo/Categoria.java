@@ -1,6 +1,6 @@
 package modelo;
 
-import dao.CategoriaDao;
+import dao.CategoriaDAO;
 import java.util.ArrayList;
 
 
@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * 
  * <p>
  * contém as informações: Nome, embalagem e tamanho
- * Encapsula operações de CRUD por um {@link CategoriaDao}
+ * Encapsula operações de CRUD por um {@link CategoriaDAO}
  * </p>
  */
 public class Categoria {
@@ -18,7 +18,7 @@ public class Categoria {
     private String nome;
     private String embalagem;
     private String tamanho;
-    private CategoriaDao dao;
+    private CategoriaDAO dao;
 
     /** Construtor padrão */
     public Categoria() {
@@ -38,7 +38,7 @@ public class Categoria {
         this.nome = nome;
         this.embalagem = embalagem;
         this.tamanho = tamanho;
-        this.dao = new CategoriaDao();
+        this.dao = new CategoriaDAO();
     }
 
     /**
@@ -93,15 +93,15 @@ public class Categoria {
     }
 
     /** @return Retorna o Dao utilizado pela classe */
-    public CategoriaDao getDao() {
+    public CategoriaDAO getDao() {
         return dao;
     }
 
     /**
      * Seta um novo Dao para operar com o BD
-     * @param dao Instância de {@link CategoriaDao}
+     * @param dao Instância de {@link CategoriaDAO}
      */
-    public void setDao(CategoriaDao dao) {
+    public void setDao(CategoriaDAO dao) {
         this.dao = dao;
     }
 

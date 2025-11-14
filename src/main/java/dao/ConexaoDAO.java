@@ -15,14 +15,14 @@ import java.sql.SQLException;
  * 
  * <p><b>Exemplo de uso:</b></p>
  * <pre>{@code 
- * ConexaoDao conexaoDao = new ConexaoDao();
- * Connection conn = conexaoDao.getConexao();
- * if (conn != null) {
- *      System.out.println("Conexão estabelecida com sucesso!");
- * }
- * }</pre>
+ ConexaoDAO conexaoDao = new ConexaoDAO();
+ Connection conn = conexaoDao.getConexao();
+ if (conn != null) {
+      System.out.println("Conexão estabelecida com sucesso!");
+ }
+ }</pre>
  */
-public class ConexaoDao {
+public class ConexaoDAO {
     
     /**
      * Obtém uma conexão com o banco de dados MySQL.

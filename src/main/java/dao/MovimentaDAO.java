@@ -21,7 +21,7 @@ import java.util.Map;
  * movimentações e obter ID
  * </p>
  */
-public class MovimentaDao extends ConexaoDao {
+public class MovimentaDAO extends ConexaoDAO {
 
     /**
      * Registra uma movimentação (entrada ou saída) de um produto no BD
