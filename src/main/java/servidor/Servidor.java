@@ -1,9 +1,25 @@
+// Documentado para javadoc
+// Fiz pelo onlinegdb, então pode dar algum bug na documentação!!
+
 package servidor;
 
-
+/**
+ * Classe principal do servidor
+ * <p>
+ * Contém o método {@code main}, que inicia a execução e 
+ * exibe um "hello world" para teste
+ * </p>
+ */
 public class Servidor {
     
-      public static void main(String[] args) {
+    /**
+     * Método principal do servidor
+     * <p>
+     * Imprime o "hello world" no console
+     * </p>
+     * @param args (obsoleto) argumentos passados pro cmd
+     */
+    public static void main(String[] args) {
         System.out.println("Hello World!");
     }
     
