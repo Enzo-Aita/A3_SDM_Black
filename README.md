@@ -1,4 +1,4 @@
-# A3_SDM_Back
+# Gerenciador de Estoque (Backend)
 
 | Nome                                  | RA          | GIH Nome  
 | ------------------------------------- | ----------- | ---------------------- |
