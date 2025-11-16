@@ -1,198 +1,315 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import modelo.Produto;
 
 /**
- * Realiza operações de CRUD para os objetos {@link Produto} no BD
- * Estende {@link ConexaoDAO} para conectar
+ * Data Access Object para operações com produtos no banco de dados
+ *
+ * @author SeuNome
+ * @version 1.0
  */
 public class ProdutoDAO extends ConexaoDAO {
 
-    /** Lista para armazenar os produtos no BD */
-    public static ArrayList<Produto> minhaLista = new ArrayList<>();
+    /**
+     * Testa a conexão com o banco de dados
+     */
+    public void testarConexaoCompleta() {
+        try {
+            Connection conn = getConexao();
+            if (conn == null) {
+                System.err.println("Falha na conexão");
+                return;
+            }
+
+            // Testar se a tabela existe
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet tables = meta.getTables("db_produtos", null, "tb_produtodao", null);
+            if (tables.next()) {
+                System.out.println(" Tabela tb_produtodao encontrada");
+            } else {
+                System.err.println("Tabela tb_produtodao NÃO encontrada");
+                return;
+            }
+
+            System.out.println("Conexão com banco funcionando!");
+
+            conn.close();
+
+        } catch (Exception e) {
+            System.err.println("Teste falhou: " + e.getMessage());
+        }
+    }
 
     /**
-     * Retorna uma lista com todos os produtos no BD
-     * @return Retorna lista de produtos no BD
+     * Obtém todos os produtos do banco de dados
+     *
+     * @return Lista de produtos
      */
-    public ArrayList<Produto> getMinhaLista() {
+    public List<Produto> getMinhaLista() {
+        List<Produto> produtos = new ArrayList<>();
+        String sql = "SELECT * FROM db_produtos.tb_produtodao";
 
-        minhaLista.clear();
+        try (Connection conn = this.getConexao(); Statement stmt = conn.createStatement(); ResultSet res = stmt.executeQuery(sql)) {
 
-        try {
-            Statement stmt = this.getConexao().createStatement();
-
-            ResultSet res = stmt.executeQuery("SELECT * FROM tb_produtodao");
             while (res.next()) {
-
-                int id = res.getInt("id");
-                String produto = res.getString("produto");
-                double preco = res.getDouble("preco");
-                String unidade = res.getString("unidade");
-                String categoria = res.getString("categoria");
-                int quantidade = res.getInt("quantidade");
-                int quantidademax = res.getInt("quantidademax");
-                int quantidademin = res.getInt("quantidademin");
-                
-                
-
-                Produto objeto = new Produto(id, produto, preco, unidade, categoria, quantidade, quantidademax, quantidademin);
-                minhaLista.add(objeto);
+                Produto objeto = new Produto(
+                        res.getInt("id"),
+                        res.getString("produto"),
+                        res.getDouble("preco"),
+                        res.getString("unidade"),
+                        res.getString("categoria"),
+                        res.getInt("quantidade"),
+                        res.getInt("estoqueminimo"),
+                        res.getInt("estoquemaximo")
+                );
+                produtos.add(objeto);
             }
-            stmt.close();
 
         } catch (SQLException ex) {
-            System.out.println("Erro:" + ex);
-
+            System.err.println("Erro ao listar produtos: " + ex.getMessage());
+            throw new RuntimeException("Erro ao buscar produtos", ex);
         }
 
-        return minhaLista;
-    }
-    
-    /**
-     * Atuualiza a lista dos produtos
-     * @param minhaLista Lista atualizada
-     */
-    public static void setMinhaLista(ArrayList<Produto> minhaLista) {
-        ProdutoDAO.minhaLista = minhaLista;
+        return produtos;
     }
 
     /**
-     * Retorna o maior ID na lista de produtos
-     * @return Retorna o ID de maior valor (ou 0 caso haja falha)
+     * Obtém o maior ID da tabela de produtos
+     *
+     * @return Maior ID encontrado
      */
     public int maiorID() {
-        int maiorID = 0;
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
         try {
-            Statement stmt = this.getConexao().createStatement();
-            ResultSet res = stmt.executeQuery("SELECT MAX(id) id FROM tb_produtodao");
-            res.next();
-            maiorID = res.getInt("id");
-            stmt.close();
-        } catch (SQLException ex) {
-            System.out.println("Erro:" + ex);
+            conn = getConexao();
+
+            String sql = "SELECT MAX(id) as maior_id FROM db_produtos.tb_produtodao";
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                int maior = rs.getInt("maior_id");
+                return Math.max(maior, 1);
+            } else {
+                return 1;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar maior ID: " + e.getMessage());
+            return 1;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Erro ao fechar conexão: " + e.getMessage());
+            }
         }
-        return maiorID;
     }
 
-
     /**
-     * Inserir um novo produto no BD
-     * @param objeto Objeto a ser inserido {@link Produto}
-     * @return Retorna true caso o processo funcione
+     * Insere um novo produto no banco de dados com valores fixos para estoque
+     *
+     * @param produto Produto a ser inserido
+     * @return true se inserido com sucesso, false caso contrário
      */
-    public boolean insertProdutoBD(Produto objeto) {
+    public boolean insertProdutoBD(Produto produto) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
 
-        String sql = "INSERT INTO tb_produtodao(id,produto,preco,unidade,categoria,quantidade,quantidademax,quantidademin) VALUES(?,?,?,?,?,?,?,?)";
         try {
-            PreparedStatement stmt = this.getConexao().prepareStatement(sql);
+            int estoqueMinimoFixo = 25;
+            int estoqueMaximoFixo = 100;
 
-            stmt.setInt(1, objeto.getId());
-            stmt.setString(2, objeto.getProduto());
-            stmt.setDouble(3, (double) objeto.getPreco());
-            stmt.setString(4, objeto.getUnidade());
-            stmt.setString(5, objeto.getCategoria());
-            stmt.setInt(6, objeto.getQuantidade());
-            stmt.setInt(7, objeto.getQuantidademax());
-            stmt.setInt(8, objeto.getQuantidademin());
+            conn = getConexao();
+            if (conn == null) {
+                System.err.println("ERRO: Conexão NULL");
+                return false;
+            }
 
-            stmt.execute();
-            stmt.close();
+            String sql = "INSERT INTO tb_produtodao (produto, preco, unidade, categoria, quantidade, estoqueminimo, estoquemaximo) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-            return true;
-        } catch (SQLException erro) {
-            System.out.println("Erro:" + erro);
-            throw new RuntimeException(erro);
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, produto.getProduto());
+            pstmt.setDouble(2, produto.getPreco());
+            pstmt.setString(3, produto.getUnidade());
+            pstmt.setString(4, produto.getCategoria());
+            pstmt.setInt(5, produto.getQuantidade());
+            pstmt.setInt(6, estoqueMinimoFixo);
+            pstmt.setInt(7, estoqueMaximoFixo);
+
+            int rows = pstmt.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            System.err.println("ERRO SQL: " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Erro ao fechar conexão: " + e.getMessage());
+            }
         }
     }
 
     /**
-     * Deleta um produto do BD
-     * @param id ID do produto a ser deletado
-     * @return Retorna true se a operação for terminada
+     * Exclui um produto do banco de dados
+     *
+     * @param id ID do produto a ser excluído
+     * @return true se excluído com sucesso, false caso contrário
      */
     public boolean deleteProdutoBD(int id) {
-        try {
-            Statement stmt = this.getConexao().createStatement();
+        String sql = "DELETE FROM db_produtos.tb_produtodao WHERE id=?";
 
-            stmt.executeUpdate("DELETE FROM tb_produtodao WHERE id =" + id);
+        try (Connection conn = this.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.close();
-        } catch (SQLException erro) {
-            System.out.println("Erro:" + erro);
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException ex) {
+            System.err.println("Erro ao deletar produto: " + ex.getMessage());
+            throw new RuntimeException("Erro ao deletar produto", ex);
         }
-        return true;
     }
 
     /**
-     * Atualiza um produto no BD
-     * @param objeto Produto com os novos dados
-     * @return Retorna true caso algum dados seja modificado
+     * Atualiza um produto no banco de dados com valores fixos para estoque
+     * mínimo e máximo
+     *
+     * @param produto Produto com dados atualizados
+     * @return true se atualizado com sucesso, false caso contrário
      */
-    public boolean updateProdutoBD(Produto objeto) {
-        String sql = "UPDATE tb_produtodao SET produto = ?, preco = ?, unidade = ?, categoria = ?, "
-                + "quantidade = ?, quantidademax = ?, quantidademin = ? WHERE id = ?";
+    public boolean updateProdutoBD(Produto produto) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
 
         try {
-            PreparedStatement stmt = this.getConexao().prepareStatement(sql);
+            int estoqueMinimoFixo = 25;
+            int estoqueMaximoFixo = 100;
 
-            stmt.setString(1, objeto.getProduto());
-            stmt.setDouble(2, (double) objeto.getPreco());
-            stmt.setString(3, objeto.getUnidade());
-            stmt.setString(4, objeto.getCategoria());
-            stmt.setInt(5, objeto.getQuantidade());
-            stmt.setInt(6, objeto.getQuantidademax());
-            stmt.setInt(7, objeto.getQuantidademin());
-            stmt.setInt(8, objeto.getId());
+            conn = this.getConexao();
+            String sql = "UPDATE tb_produtodao SET produto = ?, preco = ?, unidade = ?, "
+                    + "categoria = ?, quantidade = ?, estoqueminimo = ?, estoquemaximo = ? WHERE id = ?";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, produto.getProduto());
+            stmt.setDouble(2, produto.getPreco());
+            stmt.setString(3, produto.getUnidade());
+            stmt.setString(4, produto.getCategoria());
+            stmt.setInt(5, produto.getQuantidade());
+            stmt.setInt(6, estoqueMinimoFixo);
+            stmt.setInt(7, estoqueMaximoFixo);
+            stmt.setInt(8, produto.getId());
 
             int rowsAffected = stmt.executeUpdate();
-            stmt.close();
-
-            
-            
             return rowsAffected > 0;
-        } catch (SQLException erro) {
-            System.out.println("Erro:" + erro);
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao atualizar produto: " + e.getMessage());
             return false;
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Erro ao fechar recursos: " + e.getMessage());
+            }
         }
     }
 
     /**
-     * Atualiza o preço de um produto
-     * @param id ID do produto 
-     * @param novoPreco Novo preço do produto a ser atualizado
-     * @return Retorna true caso o produto seja atualizado corretamente
+     * Busca um produto pelo ID
+     *
+     * @param id ID do produto
+     * @return Produto encontrado ou null
      */
-    public boolean updatePrecoBD(int id, int novoPreco) {
+    public Produto getProdutoById(int id) {
+        String sql = "SELECT * FROM tb_produtodao WHERE id = ?";
+
+        try (Connection conn = this.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+
+            try (ResultSet res = stmt.executeQuery()) {
+                if (res.next()) {
+                    return new Produto(
+                            res.getInt("id"),
+                            res.getString("produto"),
+                            res.getDouble("preco"),
+                            res.getString("unidade"),
+                            res.getString("categoria"),
+                            res.getInt("quantidade"),
+                            res.getInt("estoqueminimo"),
+                            res.getInt("estoquemaximo")
+                    );
+                }
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Erro ao buscar produto por ID: " + ex.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Atualiza apenas o preço de um produto
+     *
+     * @param id ID do produto
+     * @param novoPreco Novo preço
+     * @return true se atualizado com sucesso, false caso contrário
+     */
+    public boolean updatePrecoBD(int id, double novoPreco) {
         String sql = "UPDATE tb_produtodao SET preco = ? WHERE id = ?";
 
-        try {
-            PreparedStatement stmt = this.getConexao().prepareStatement(sql);
-            stmt.setInt(1, novoPreco);
+        try (Connection conn = this.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDouble(1, novoPreco);
             stmt.setInt(2, id);
 
             int rowsAffected = stmt.executeUpdate();
-            stmt.close();
-
             return rowsAffected > 0;
-        } catch (SQLException erro) {
-            System.out.println("Erro ao atualizar preço:" + erro);
+
+        } catch (SQLException ex) {
+            System.err.println("Erro ao atualizar preço: " + ex.getMessage());
             return false;
         }
     }
 
     /**
-     * Atualiza a quantidade de itens de um produto em estoque
+     * Atualiza apenas a quantidade de um produto
+     *
      * @param id ID do produto
-     * @param novaQuantidade Nova quantidade do produto em estoque
-     * @return Retorna true caso a operação funcione
+     * @param novaQuantidade Nova quantidade
+     * @return true se atualizado com sucesso, false caso contrário
      */
     public boolean updateQuantidadeBD(int id, int novaQuantidade) {
         String sql = "UPDATE tb_produtodao SET quantidade = ? WHERE id = ?";
@@ -204,40 +321,181 @@ public class ProdutoDAO extends ConexaoDAO {
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
-        } catch (SQLException erro) {
-            System.out.println("Erro ao atualizar quantidade:" + erro);
+
+        } catch (SQLException ex) {
+            System.err.println("Erro ao atualizar quantidade: " + ex.getMessage());
             return false;
         }
     }
 
     /**
-     * Carrega os dados de um produto com base no ID
-     * @param id ID do produto (para busca)
-     * @return Retorna o objeto {@link Produto} com os dados do BD
+     * Carrega um produto pelo ID
+     *
+     * @param id ID do produto
+     * @return Produto carregado
      */
     public Produto carregaProduto(int id) {
+        String sql = "SELECT * FROM tb_produtodao WHERE id = ?";
         Produto objeto = new Produto();
         objeto.setId(id);
-        try {
-            Statement stmt = this.getConexao().createStatement();
 
-            ResultSet res = stmt.executeQuery("SELECT * FROM tb_produtodao WHERE id =" + id);
-            res.next();
+        try (Connection conn = this.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            objeto.setProduto(res.getString("produto"));
-            objeto.setPreco(res.getDouble("preco"));
-            objeto.setUnidade(res.getString("unidade"));
-            objeto.setCategoria(res.getString("categoria"));
-            objeto.setQuantidade(res.getInt("quantidade"));
-            objeto.setQuantidademax(res.getInt("quantidademax"));
-            objeto.setQuantidademin(res.getInt("quantidademin"));
+            stmt.setInt(1, id);
 
-            stmt.close();
-        } catch (SQLException erro) {
-            System.out.println("Erro:" + erro);
+            try (ResultSet res = stmt.executeQuery()) {
+                if (res.next()) {
+                    objeto.setProduto(res.getString("produto"));
+                    objeto.setPreco(res.getDouble("preco"));
+                    objeto.setUnidade(res.getString("unidade"));
+                    objeto.setCategoria(res.getString("categoria"));
+                    objeto.setQuantidade(res.getInt("quantidade"));
+                    objeto.setEstoqueminimo(res.getInt("estoqueminimo"));
+                    objeto.setEstoquemaximo(res.getInt("estoquemaximo"));
+                }
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Erro ao carregar produto: " + ex.getMessage());
+            throw new RuntimeException("Erro ao carregar produto", ex);
         }
         return objeto;
     }
 
-}
+    /**
+     * Busca um produto pelo nome
+     *
+     * @param nomeProduto Nome do produto
+     * @return Produto encontrado ou null
+     */
+    public Produto buscarProdutoPorNome(String nomeProduto) {
+        String sql = "SELECT * FROM tb_produtodao WHERE produto = ?";
 
+        try (Connection conn = this.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, nomeProduto);
+
+            try (ResultSet res = stmt.executeQuery()) {
+                if (res.next()) {
+                    return new Produto(
+                            res.getInt("id"),
+                            res.getString("produto"),
+                            res.getDouble("preco"),
+                            res.getString("unidade"),
+                            res.getString("categoria"),
+                            res.getInt("quantidade"),
+                            res.getInt("estoqueminimo"),
+                            res.getInt("estoquemaximo")
+                    );
+                }
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Erro ao buscar produto por nome: " + ex.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Busca produtos por categoria
+     *
+     * @param categoria Categoria dos produtos
+     * @return Lista de produtos da categoria
+     */
+    public List<Produto> buscarProdutosPorCategoria(String categoria) {
+        List<Produto> produtos = new ArrayList<>();
+        String sql = "SELECT * FROM tb_produtodao WHERE categoria = ?";
+
+        try (Connection conn = this.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, categoria);
+
+            try (ResultSet res = stmt.executeQuery()) {
+                while (res.next()) {
+                    Produto objeto = new Produto(
+                            res.getInt("id"),
+                            res.getString("produto"),
+                            res.getDouble("preco"),
+                            res.getString("unidade"),
+                            res.getString("categoria"),
+                            res.getInt("quantidade"),
+                            res.getInt("estoqueminimo"),
+                            res.getInt("estoquemaximo")
+                    );
+                    produtos.add(objeto);
+                }
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Erro ao buscar produtos por categoria: " + ex.getMessage());
+        }
+        return produtos;
+    }
+
+    /**
+     * Busca produtos abaixo do estoque mínimo
+     *
+     * @return Lista de produtos abaixo do mínimo
+     */
+    public List<Produto> getProdutosAbaixoMinimo() {
+        List<Produto> produtos = new ArrayList<>();
+        String sql = "SELECT * FROM tb_produtodao WHERE quantidade < estoqueminimo";
+
+        try (Connection conn = this.getConexao(); Statement stmt = conn.createStatement(); ResultSet res = stmt.executeQuery(sql)) {
+
+            while (res.next()) {
+                Produto objeto = new Produto(
+                        res.getInt("id"),
+                        res.getString("produto"),
+                        res.getDouble("preco"),
+                        res.getString("unidade"),
+                        res.getString("categoria"),
+                        res.getInt("quantidade"),
+                        res.getInt("estoqueminimo"),
+                        res.getInt("estoquemaximo")
+                );
+                produtos.add(objeto);
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Erro ao buscar produtos abaixo do mínimo: " + ex.getMessage());
+        }
+        return produtos;
+    }
+
+    /**
+     * Corrige os valores de estoque mínimo e máximo para todos os produtos
+     * Define estoque mínimo = 25 e estoque máximo = 100 para todos os produtos
+     *
+     * @return Número de produtos corrigidos
+     */
+    public int corrigirEstoqueMinMax() {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = this.getConexao();
+
+            String sql = "UPDATE tb_produtodao SET estoqueminimo = 25, estoquemaximo = 100";
+
+            stmt = conn.prepareStatement(sql);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected;
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao corrigir estoque min/max: " + e.getMessage());
+            return 0;
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Erro ao fechar recursos: " + e.getMessage());
+            }
+        }
+    }
+}
