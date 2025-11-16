@@ -1,4 +1,4 @@
-package servidor;
+package server;
 
 /**
  * Classe principal do servidor
@@ -7,7 +7,7 @@ package servidor;
  * exibe um "hello world" para teste
  * </p>
  */
-public class Servidor {
+public class EstoqueServer {
     
     /**
      * Método principal do servidor
