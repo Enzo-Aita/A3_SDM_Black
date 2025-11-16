@@ -162,7 +162,7 @@ public boolean updateCategoriaBD(int id, String nome, String embalagem, String t
      * @return Retorna o objeto {@link Categoria} correspondente
      */
     public Categoria carregaCategoria(int id) {
-        return dao.carregaCategoria(id);
+        return dao.listarCategoria(id);
     }
 
 

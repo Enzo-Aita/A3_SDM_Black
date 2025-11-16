@@ -1,6 +1,5 @@
 package dao;
 
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,19 +8,22 @@ import java.util.ArrayList;
 import modelo.Categoria;
 
 /**
- * Operações CRUD da entidade {@link Categoria}
- * Estende {@link ConexaoDAO} para acesso ao BD
- * 
- * Essa função gera métodos para inserir, atualizar, excluir e consultar categorias dos produtos
- * Tabela: <code>tb_categoriadao</code>
+ * Operações CRUD da entidade {@link Categoria} Estende {@link ConexaoDAO} para
+ * acesso ao BD
+ *
+ * Essa função gera métodos para inserir, atualizar, excluir e consultar
+ * categorias dos produtos Tabela: <code>tb_categoriadao</code>
  */
 public class CategoriaDAO extends ConexaoDAO {
 
-    /** Lista auxiliar de armazenamento para os objetos 'Categoria' no BD */
+    /**
+     * Lista auxiliar de armazenamento para os objetos 'Categoria' no BD
+     */
     public static ArrayList<Categoria> minhaLista = new ArrayList<>();
 
     /**
      * Retorna todas as categorias no BD
+     *
      * @return Retorna uma lista com os objetos de {@link Categoria}
      */
     public ArrayList<Categoria> getMinhaLista() {
@@ -49,11 +51,12 @@ public class CategoriaDAO extends ConexaoDAO {
         return minhaLista;
     }
 
-/**
- * Retorna o maior ID registrado em <code>tb_categoriadao</code>
- * @return Retorna o maior ID encontrado (ou zero, em caso de erro)
- */    
-public int maiorID() {
+    /**
+     * Retorna o maior ID registrado em <code>tb_categoriadao</code>
+     *
+     * @return Retorna o maior ID encontrado (ou zero, em caso de erro)
+     */
+    public int maiorID() {
         int maiorID = 0;
 
         try {
@@ -70,6 +73,7 @@ public int maiorID() {
 
     /**
      * Insere um objeto no BD
+     *
      * @param objeto Categoria do objeto a ser incluída
      * @return Retorna true caso a operação funcione
      * @throws RuntimeException caso ocorra um erro durante a operação
@@ -93,14 +97,14 @@ public int maiorID() {
             throw new RuntimeException(ex);
         }
     }
- 
-/**
-* Remove uma categoria do BD  com base no seu ID.
-*
-* @param id ID da categoria que será excluída
-* @return true se a exclusão ocorrer com sucesso, ou false caso contrário.
-*/
-public boolean deleteCategoriaBD(int id) {
+
+    /**
+     * Remove uma categoria do BD com base no seu ID.
+     *
+     * @param id ID da categoria que será excluída
+     * @return true se a exclusão ocorrer com sucesso, ou false caso contrário.
+     */
+    public boolean deleteCategoriaBD(int id) {
         try {
             Statement stmt = this.getConexao().createStatement();
             stmt.executeUpdate("DELETE FROM tb_categoriadao WHERE id =" + id);
@@ -114,6 +118,7 @@ public boolean deleteCategoriaBD(int id) {
 
     /**
      * Atualiza os dados de uma categoria no BD
+     *
      * @param objeto Uma instância de {@link Categoria} com dados atualizados
      * @return Retorna true caso alguma atualização ocorra de fato
      */
@@ -136,14 +141,15 @@ public boolean deleteCategoriaBD(int id) {
             return false;
         }
     }
-    
-/**
- * Carrega uma categoria com base no ID do produto
- * @param id ID do produto
- * @return Retorna um objeto {@link Categoria} com os dados encontrados, ou a categoria
- * apenas com o ID, caso não ache registro
- */
-public Categoria carregaCategoria(int id) {
+
+    /**
+     * Carrega uma categoria com base no ID do produto
+     *
+     * @param id ID do produto
+     * @return Retorna um objeto {@link Categoria} com os dados encontrados, ou
+     * a categoria apenas com o ID, caso não ache registro
+     */
+    public Categoria listarCategoria(int id) {
         Categoria objeto = new Categoria();
         objeto.setId(id);
 
