@@ -1,309 +1,207 @@
 package modelo;
 
-import dao.ProdutoDAO;
-import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
- * Representa um (1) Produto
+ * Representa um produto do estoque
  * <p>
- * Cada produto possui preço, unidade, categoria, quantidade e limite de
- * estoque.
- * Encapsula operações pelo {@link ProdutoDAO}
+ * Realizar operações pelo ProdutoDao
  * </p>
  */
-public class Produto {
-    
-    /** Código de identificação do produto */
+public class Produto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Código de identificação do produto
+     */
     private int id;
-    
-    /** Preço do produto */
+
+    /**
+     * Preço do produto
+     */
     private double preco;
-    
-    /** Unidade de medida(?) */
+
+    // Esse aqui eu não entendi muito bem como comentar
     private String unidade;
-    
-    /** Categoria do produto */
+
+    /**
+     * Categoria do produto
+     */
     private String categoria;
-    
-    /** Nome do produto */
+
+    /**
+     * Nome do produto
+     */
     private String produto;
-    
-    /** Quantidade do produto em estoque */
+
+    /**
+     * Quantidade em estoque do produto
+     */
     private int quantidade;
-    
-    /** Quantidade máxima do produto em estoque */
-    private int quantidademax;
-    
-    /** Quantidade mínima do produto em estoque */
-    private int quantidademin;
-    
-    /** Objeto para acesso do BD */
-    private ProdutoDAO dao;
-    
+
+    /**
+     * Estoque mínimo do produto no estoque
+     */
+    private int estoqueminimo;
+
+    /**
+     * Estoque máximo do produto no estoque
+     */
+    private int estoquemaximo;
 
     // Construtores
-    
-    /** Construtor padrão de inicialização */
+    /**
+     * Construtor para inicializar o produto
+     */
     public Produto() {
         this(0, "", 0, "", "", 0, 0, 0);
     }
 
     /**
      * Construtor completo
-     * 
+     *
      * @param id ID do produto
-     * @param produto nome do produto
-     * @param preco preço do produto
-     * @param unidade unidade de medida(?)
-     * @param categoria categoria do produto
-     * @param quantidade quantidade em estoque
-     * @param quantidademax quantidade máxima em estoque
-     * @param quantidademin quantidade mínima em estoque
-     * 
+     * @param produto Nome do produto
+     * @param preco Preço do produto
+     * @param unidade
+     * @param categoria Categoria do produto
+     * @param quantidade Quantidade em estoque do produto
+     * @param estoqueminimo Quantidade máxima em estoque do produto
+     * @param estoquemaximo Quantidade mínima em estoque do produto
      */
     public Produto(int id, String produto, double preco, String unidade,
-            String categoria, int quantidade, int quantidademax, int quantidademin) {
+            String categoria, int quantidade, int estoqueminimo, int estoquemaximo) {
         this.id = id;
         this.preco = preco;
         this.unidade = unidade;
         this.categoria = categoria;
         this.produto = produto;
         this.quantidade = quantidade;
-        this.quantidademax = quantidademax;
-        this.quantidademin = quantidademin;
-        this.dao = new ProdutoDAO();
+        this.estoqueminimo = estoqueminimo;
+        this.estoquemaximo = estoquemaximo;
+
     }
 
-    
     // Getters e Setters
-    
-    /** @return Retorna o ID do produto */
+    /**
+     * @return Retorna o ID do produto
+     */
     public int getId() {
         return id;
     }
-    
-    /** @param id seta um ID novo para o produto */
+
+    /**
+     * @param id Seta o ID do produto
+     */
     public void setId(int id) {
         this.id = id;
     }
 
-    /** @return Retorna o preço do produto */
+    /**
+     * @return Retorna o preço do produto
+     */
     public double getPreco() {
         return preco;
     }
 
-    /** Seta o preço do produto
+    /**
+     * Seta o preço do produto
      *
-     * @param preco Novo preço do produto
-     * @throws IllegalArgumentException Se o preço for negativo
-    */
+     * @param preco Novo preço
+     * @throws RuntimeException Caso o preço seja negativo
+     */
     public void setPreco(double preco) {
-        if (preco < 0) throw new IllegalArgumentException("Erro, o preço não pode ser negativo!");
+        if (preco < 0) {
+            throw new RuntimeException("Preço não pode ser negativo");
+        }
         this.preco = preco;
     }
 
-    /** @return Retorna a unidade do produto */
+    // Esse aqui eu não entendi muito bem como comentar
     public String getUnidade() {
         return unidade;
     }
 
-    /** @param unidade Seta a nova unidade do produto */
     public void setUnidade(String unidade) {
         this.unidade = unidade;
     }
 
-    /** @return Retorna a categoria do produto */
+    /**
+     * @return Retorna a categoria do produto
+     */
     public String getCategoria() {
         return categoria;
     }
 
-    /** @param categoria Seta a nova categoria do produto */
+    /**
+     * @param categoria Seta a categoria do produto
+     */
     public void setCategoria(String categoria) {
         this.categoria = categoria;
     }
 
-    /** @return Retorna o nome do produto */
+    /**
+     * @return Retorna o nome do produto
+     */
     public String getProduto() {
         return produto;
     }
 
-    /** @param produto seta o novo nome do produto */
+    /**
+     * @param produto Seta o nome do produto
+     */
     public void setProduto(String produto) {
         this.produto = produto;
     }
 
-    /** @return Retorna a quantidade em estoque do produto */
+    /**
+     * @return Retorna a quantidade em estoque de um produto
+     */
     public int getQuantidade() {
         return quantidade;
     }
 
-    /** @param quantidade Seta uma nova quantidade em estoque para o produto */
+    /**
+     * Define a quantidade em estoque de um produto
+     *
+     * @param quantidade Nova quantidade
+     * @throws RuntimeException Caso a quantidade seja negativa
+     */
     public void setQuantidade(int quantidade) {
+        if (quantidade < 0) {
+            throw new RuntimeException("Quantidade não pode ser negativa");
+        }
         this.quantidade = quantidade;
     }
 
-    /** @return Retorna a quantidade máxima permitida do produto */
-    public int getQuantidademax() {
-        return quantidademax;
-    }
-
-    /** @param quantidademax Seta uma nova quantidade máxima permitida */
-    public void setQuantidademax(int quantidademax) {
-        this.quantidademax = quantidademax;
-    }
-
-    /** @return Retorna a quantidade mínima permitida do produto */
-    public int getQuantidademin() {
-        return quantidademin;
-    }
-
-    /** @param quantidademax Seta uma nova quantidade mínima permitida */
-    public void setQuantidademin(int quantidademin) {
-        this.quantidademin = quantidademin;
-    }
-
-    /** @return Retorna o objeto de acesso ao BD */
-    public ProdutoDAO getDao() {
-        return dao;
-    }
-
-    /** @param dao Novo dao para acesso ao BD */
-    public void setDao(ProdutoDAO dao) {
-        this.dao = dao;
-    }
-    
-    
     /**
-     * Obtém a lista de produtos no sistema
-     * @return Retorna a lista de produtos
+     * @return Retorna a Estoque mínimo
      */
-    public ArrayList<Produto> getMinhaLista() {
-        return dao.getMinhaLista();
+    public int getEstoqueminimo() {
+        return estoqueminimo;
     }
 
     /**
-     * Insere um novo produto no BD
-     *
-     * @param produto Nome do produto
-     * @param preco Preço do produto
-     * @param unidade Unidade de medida
-     * @param categoria Categoria
-     * @param quantidade Quantidade em estoque
-     * @param quantidademax Limite máximo em estoque
-     * @param quantidademin Limite mínimo em estoque
-     * @return Retorna true se o processo funcionar
+     * @param estoqueMinimo Seta a estoque mínimo
      */
-    public boolean insertProdutoBD(String produto, double preco, String unidade, String categoria, int quantidade, int quantidademax, int quantidademin) {
-        int id = this.maiorID() + 1;
-        Produto objeto = new Produto(id, produto, preco, unidade, categoria, quantidade, quantidademax, quantidademin);
-        dao.insertProdutoBD(objeto);
-        return true;
-    }
-
-
-    /**
-     * Remove um produto do BD
-     *
-     * @param id ID do produto a ser removido
-     * @return Retorna true se a exclusão ocorrer com sucesso
-     */
-    public boolean deleteProdutoBD(int id) {
-
-        dao.deleteProdutoBD(id);
-        return true;
+    public void setEstoqueminimo(int estoqueMinimo) {
+        this.estoqueminimo = estoqueMinimo;
     }
 
     /**
-     * Atualiza o preço de um produto no BD
-     *
-     * @param id ID do produto
-     * @param novoPreco Novo valor do preço
-     * @return Retorna true se a atualização for bem-sucedida
+     * @return Retorna a estoque máximo
      */
-    public boolean updatePrecoBD(int id, int novoPreco) {
-        return dao.updatePrecoBD(id, novoPreco);
+    public int getEstoquemaximo() {
+        return estoquemaximo;
     }
 
     /**
-     * Atualiza todas as informações de um produto
-     *
-     * @param id ID do produto
-     * @param produto Nome do produto
-     * @param preco Preço do produto
-     * @param unidade Unidade
-     * @param categoria Categoria do produto
-     * @param quantidade Estoque atual
-     * @param quantidademax Limite máximo em estoque
-     * @param quantidademin Limite mínimo em estoque
-     * @return Retorna true Se for atualizado com sucesso
+     * @param estoqueMaximo Seta a quantidade mínima
      */
-    public boolean updateProdutoBD(int id, String produto,
-            double preco, String unidade, String categoria,
-            int quantidade, int quantidademax, int quantidademin) {
-
-        Produto objeto = new Produto(id, produto, preco, unidade,
-                categoria, quantidade, quantidademax, quantidademin);
-
-       
-        return dao.updateProdutoBD(objeto);
+    public void setEstoquemaximo(int estoqueMaximo) {
+        this.estoquemaximo = estoqueMaximo;
     }
 
-    /**
-     * Atualiza a quantidade em estoque
-     *
-     * @param id ID do produto
-     * @param novaQuantidade Nova quantidade em estoque
-     * @return Retorna true se for atualizado com sucesso
-     */
-    public boolean updateQuantidadeBD(int id, int novaQuantidade) {
-        return dao.updateQuantidadeBD(id, novaQuantidade);
-    }
-
-    /**
-     * Carrega um produto com base no ID
-     *
-     * @param id ID do produto
-     * @return Retorna o obbjeto {@code Produto} correspondente
-     */
-    public Produto carregaProduto(int id) {
-        return dao.carregaProduto(id);
-    }
-
-    /**
-     * Retorna o maior ID no BD
-     *
-     * @return Retorna o maior ID encontrado
-     */
-    public int maiorID() {
-        return dao.maiorID();
-    }
-
-    
-    
-    /**
-     * Altera o preço de todos os produtos com base no percentual informado
-     *
-     * @param percentual Percentual de reajuste dos preços (postv. ou negtv.)
-     * @return Retornatrue caso o reajuste ocorra sem erros
-     */
-    public boolean reajustarPrecos(double percentual) {
-        try {
-            ArrayList<Produto> produtos = getMinhaLista();
-
-            for (Produto produto : produtos) {
-                double precoAtual = produto.getPreco();
-                int novoPreco = (int) Math.round(precoAtual * (1 + percentual / 100.0));
-                produto.setPreco(novoPreco);
-            }
-
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-
-        }
-    }
 }
 
-
-// Era uma boa transferir parte da lógica de acesso pro produtodao
