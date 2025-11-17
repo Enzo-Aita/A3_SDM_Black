@@ -79,16 +79,25 @@ public class CategoriaDAO extends ConexaoDAO {
      * @throws RuntimeException caso ocorra um erro durante a operação
      */
     public boolean insertCategoriaBD(Categoria objeto) {
-        String sql = "INSERT INTO tb_categoriadao(id,nome,embalagem,tamanho) VALUES(?,?,?,?)";
+
+        String sql = "INSERT INTO tb_categoriadao(nome,embalagem,tamanho) VALUES(?,?,?)";
 
         try {
-            PreparedStatement stmt = this.getConexao().prepareStatement(sql);
-            stmt.setInt(1, objeto.getId());
-            stmt.setString(2, objeto.getNome());
-            stmt.setString(3, objeto.getEmbalagem());
-            stmt.setString(4, objeto.getTamanho());
+            PreparedStatement stmt = this.getConexao().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            stmt.setString(1, objeto.getNome());
+            stmt.setString(2, objeto.getEmbalagem());
+            stmt.setString(3, objeto.getTamanho());
 
             stmt.execute();
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int novoId = generatedKeys.getInt(1);
+                    objeto.setId(novoId);
+                }
+            }
+
             stmt.close();
             return true;
 

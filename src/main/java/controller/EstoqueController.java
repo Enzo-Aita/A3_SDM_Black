@@ -139,10 +139,7 @@ public class EstoqueController {
      */
     private Mensagem cadastrarProduto(Produto produto) {
         try {
-            if (produto.getId() <= 0) {
-                int novoId = produtoDAO.maiorID() + 1;
-                produto.setId(novoId);
-            }
+            produto.setId(0);
 
             boolean sucesso = produtoDAO.insertProdutoBD(produto);
 

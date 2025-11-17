@@ -146,7 +146,7 @@ public class ProdutoDAO extends ConexaoDAO {
             }
 
             String sql = "INSERT INTO tb_produtodao (produto, preco, unidade, categoria, quantidade, estoqueminimo, estoquemaximo) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
+            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, produto.getProduto());
             pstmt.setDouble(2, produto.getPreco());
@@ -155,8 +155,16 @@ public class ProdutoDAO extends ConexaoDAO {
             pstmt.setInt(5, produto.getQuantidade());
             pstmt.setInt(6, estoqueMinimoFixo);
             pstmt.setInt(7, estoqueMaximoFixo);
-
+            
             int rows = pstmt.executeUpdate();
+            if (rows > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int novoId = generatedKeys.getInt(1);
+                        produto.setId(novoId);
+                    }
+                }
+            }
             return rows > 0;
 
         } catch (SQLException e) {
