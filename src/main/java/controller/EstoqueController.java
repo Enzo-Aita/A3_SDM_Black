@@ -139,7 +139,8 @@ public class EstoqueController {
      */
     private Mensagem cadastrarProduto(Produto produto) {
         try {
-            produto.setId(0);
+         
+            produto.setId(0); 
 
             boolean sucesso = produtoDAO.insertProdutoBD(produto);
 

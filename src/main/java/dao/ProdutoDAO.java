@@ -19,36 +19,6 @@ import modelo.Produto;
 public class ProdutoDAO extends ConexaoDAO {
 
     /**
-     * Testa a conexão com o banco de dados
-     */
-    public void testarConexaoCompleta() {
-        try {
-            Connection conn = getConexao();
-            if (conn == null) {
-                System.err.println("Falha na conexão");
-                return;
-            }
-
-            // Testar se a tabela existe
-            DatabaseMetaData meta = conn.getMetaData();
-            ResultSet tables = meta.getTables("db_produtos", null, "tb_produtodao", null);
-            if (tables.next()) {
-                System.out.println(" Tabela tb_produtodao encontrada");
-            } else {
-                System.err.println("Tabela tb_produtodao NÃO encontrada");
-                return;
-            }
-
-            System.out.println("Conexão com banco funcionando!");
-
-            conn.close();
-
-        } catch (Exception e) {
-            System.err.println("Teste falhou: " + e.getMessage());
-        }
-    }
-
-    /**
      * Obtém todos os produtos do banco de dados
      *
      * @return Lista de produtos
@@ -136,35 +106,37 @@ public class ProdutoDAO extends ConexaoDAO {
         PreparedStatement pstmt = null;
 
         try {
-            int estoqueMinimoFixo = 25;
-            int estoqueMaximoFixo = 100;
-
             conn = getConexao();
             if (conn == null) {
                 System.err.println("ERRO: Conexão NULL");
                 return false;
             }
 
+           
             String sql = "INSERT INTO tb_produtodao (produto, preco, unidade, categoria, quantidade, estoqueminimo, estoquemaximo) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
             pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, produto.getProduto());
             pstmt.setDouble(2, produto.getPreco());
             pstmt.setString(3, produto.getUnidade());
             pstmt.setString(4, produto.getCategoria());
             pstmt.setInt(5, produto.getQuantidade());
-            pstmt.setInt(6, estoqueMinimoFixo);
-            pstmt.setInt(7, estoqueMaximoFixo);
-            
+            pstmt.setInt(6, 25); 
+            pstmt.setInt(7, 100); 
+
             int rows = pstmt.executeUpdate();
+
+            
             if (rows > 0) {
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        int novoId = generatedKeys.getInt(1);
-                        produto.setId(novoId);
-                    }
+                ResultSet generatedKeys = pstmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    int novoId = generatedKeys.getInt(1);
+                    produto.setId(novoId); 
+                    System.out.println("Novo ID gerado para produto: " + novoId);
                 }
+                generatedKeys.close();
             }
+
             return rows > 0;
 
         } catch (SQLException e) {
