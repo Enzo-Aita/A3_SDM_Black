@@ -49,6 +49,7 @@ public class EstoqueServer {
             running = true;
             System.out.println("INICIANDO SERVIDOR DE ESTOQUE");
             System.out.println("Servidor de estoque iniciado na porta " + port);
+            System.out.println("IP do servidor: " + getIpAddress());
             System.out.println("Banco: db_produtos");
             System.out.println("Aguardando conexões de clientes...");
 
@@ -74,6 +75,21 @@ public class EstoqueServer {
             }
         } catch (IOException e) {
             System.err.println("Erro ao parar servidor: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtém o endereço IP da máquina onde o servidor está executando Útil para
+     * informar aos clientes qual IP usar para conexão
+     *
+     * @return String com o endereço IP local ou mensagem de erro se não for
+     * possível obter
+     */
+    private String getIpAddress() {
+        try {
+            return java.net.InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            return "Não foi possível obter o IP";
         }
     }
 
