@@ -54,21 +54,25 @@ public class CategoriaDAO extends ConexaoDAO {
     /**
      * Retorna o maior ID registrado em <code>tb_categoriadao</code>
      *
-     * @return Retorna o maior ID encontrado (ou zero, em caso de erro)
+     * @return Retorna o maior ID encontrado (ou 1, em caso de tabela vazia)
      */
     public int maiorID() {
         int maiorID = 0;
 
         try {
             Statement stmt = this.getConexao().createStatement();
-            ResultSet res = stmt.executeQuery("SELECT MAX(id) id FROM tb_categoriadao");
+            ResultSet res = stmt.executeQuery("SELECT COALESCE(MAX(id), 0) as id FROM tb_categoriadao");
             res.next();
             maiorID = res.getInt("id");
             stmt.close();
+
+            // Se não há registros, começa com 1
+            return maiorID == 0 ? 1 : maiorID + 1;
+
         } catch (SQLException ex) {
             System.err.println("Erro ao buscar maior ID: " + ex.getMessage());
+            return 1;
         }
-        return maiorID;
     }
 
     /**
@@ -78,22 +82,20 @@ public class CategoriaDAO extends ConexaoDAO {
      * @return Retorna true caso a operação funcione
      * @throws RuntimeException caso ocorra um erro durante a operação
      */
+
     public boolean insertCategoriaBD(Categoria objeto) {
-       
+
         String sql = "INSERT INTO tb_categoriadao (nome, embalagem, tamanho) VALUES (?, ?, ?)";
 
         try {
             PreparedStatement stmt = this.getConexao().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-           
-           
             stmt.setString(1, objeto.getNome());
             stmt.setString(2, objeto.getEmbalagem());
             stmt.setString(3, objeto.getTamanho());
 
             int rowsAffected = stmt.executeUpdate();
 
-           
             if (rowsAffected > 0) {
                 ResultSet generatedKeys = stmt.getGeneratedKeys();
                 if (generatedKeys.next()) {

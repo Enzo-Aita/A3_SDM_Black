@@ -38,6 +38,7 @@ public class EstoqueServer {
         server.start(12345);
     }
 
+
     /**
      * Inicia o servidor na porta especificada
      *
@@ -49,7 +50,6 @@ public class EstoqueServer {
             running = true;
             System.out.println("INICIANDO SERVIDOR DE ESTOQUE");
             System.out.println("Servidor de estoque iniciado na porta " + port);
-            System.out.println("IP do servidor: " + getIpAddress());
             System.out.println("Banco: db_produtos");
             System.out.println("Aguardando conexões de clientes...");
 
@@ -81,9 +81,6 @@ public class EstoqueServer {
     /**
      * Obtém o endereço IP da máquina onde o servidor está executando Útil para
      * informar aos clientes qual IP usar para conexão
-     *
-     * @return String com o endereço IP local ou mensagem de erro se não for
-     * possível obter
      */
     private String getIpAddress() {
         try {

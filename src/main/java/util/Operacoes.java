@@ -21,13 +21,14 @@ public class Operacoes {
 
     // Histórico 
     public static final String OBTER_HISTORICO_MOVIMENTACOES = "OBTER_HISTORICO_MOVIMENTACOES";
-
+    public static final String TESTE_CONEXAO = "TESTE_CONEXAO";
     // Relatórios
     public static final String RELATORIO_PRECOS = "RELATORIO_PRECOS";
     public static final String RELATORIO_BALANCO = "RELATORIO_BALANCO";
     public static final String RELATORIO_ESTOQUE_MINIMO = "RELATORIO_ESTOQUE_MINIMO";
     public static final String RELATORIO_ESTOQUE_MAXIMO = "RELATORIO_ESTOQUE_MAXIMO";
     public static final String RELATORIO_PRODUTOS_CATEGORIA = "RELATORIO_PRODUTOS_CATEGORIA";
+    
 
     // Preço
     public static final String REAJUSTAR_PRECOS = "REAJUSTAR_PRECOS";

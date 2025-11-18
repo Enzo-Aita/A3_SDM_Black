@@ -52,9 +52,9 @@ public class ProdutoDAO extends ConexaoDAO {
     }
 
     /**
-     * Obtém o maior ID da tabela de produtos
+     * Retorna o próximo ID disponível para inserção
      *
-     * @return Maior ID encontrado
+     * @return Próximo ID disponível
      */
     public int maiorID() {
         Connection conn = null;
@@ -64,15 +64,16 @@ public class ProdutoDAO extends ConexaoDAO {
         try {
             conn = getConexao();
 
-            String sql = "SELECT MAX(id) as maior_id FROM db_produtos.tb_produtodao";
+            // Busca o maior ID atual na tabela
+            String sql = "SELECT COALESCE(MAX(id), 0) as maior_id FROM tb_produtodao";
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 int maior = rs.getInt("maior_id");
-                return Math.max(maior, 1);
+                return maior + 1; // Próximo ID será o maior atual + 1
             } else {
-                return 1;
+                return 1; // Se não houver registros, começa com 1
             }
 
         } catch (SQLException e) {
@@ -107,12 +108,8 @@ public class ProdutoDAO extends ConexaoDAO {
 
         try {
             conn = getConexao();
-            if (conn == null) {
-                System.err.println("ERRO: Conexão NULL");
-                return false;
-            }
 
-           
+          
             String sql = "INSERT INTO tb_produtodao (produto, preco, unidade, categoria, quantidade, estoqueminimo, estoquemaximo) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -121,8 +118,8 @@ public class ProdutoDAO extends ConexaoDAO {
             pstmt.setString(3, produto.getUnidade());
             pstmt.setString(4, produto.getCategoria());
             pstmt.setInt(5, produto.getQuantidade());
-            pstmt.setInt(6, 25); 
-            pstmt.setInt(7, 100); 
+            pstmt.setInt(6, produto.getEstoqueminimo());
+            pstmt.setInt(7, produto.getEstoquemaximo());
 
             int rows = pstmt.executeUpdate();
 

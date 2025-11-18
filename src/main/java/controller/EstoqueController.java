@@ -93,6 +93,8 @@ public class EstoqueController {
 
                 case Operacoes.RELATORIO_PRECOS:
                     return gerarRelatorioPrecos();
+                case "TESTE_CONEXAO":
+                    return new Mensagem("SUCESSO", "Conexão estabelecida com sucesso");
 
                 case Operacoes.RELATORIO_BALANCO:
                     return gerarBalancoFisicoFinanceiro();
@@ -139,8 +141,8 @@ public class EstoqueController {
      */
     private Mensagem cadastrarProduto(Produto produto) {
         try {
-         
-            produto.setId(0); 
+
+            produto.setId(0);
 
             boolean sucesso = produtoDAO.insertProdutoBD(produto);
 
